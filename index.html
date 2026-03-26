@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CüzdanCanavarı - Varlıklarım</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">👾 CüzdanCanavarı</div>
+        <nav>
+            <a href="index.html" class="active">Varlıklarım</a>
+            <a href="avatar.html">Avatarım</a>
+            <a href="#">Bilgi Arenası</a>
+        </nav>
+        <div class="coin-display">🪙 <span id="user-coins">1250</span> Coin</div>
+    </header>
+
+    <main class="container">
+        
+        <section class="card add-transaction">
+            <h2>Yeni İşlem Ekle</h2>
+            <form id="transaction-form">
+                <div class="form-group">
+                    <input type="text" placeholder="Ne için harcadın? (Örn: Kahve)" required id="trans-desc">
+                    <input type="number" placeholder="Tutar (TL)" required id="trans-amount">
+                </div>
+                
+                <div class="toggle-container">
+                    <span>Zorunlu İhtiyaç</span>
+                    <label class="switch">
+                        <input type="checkbox" id="type-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="highlight-red">Keyfi Harcama</span>
+                </div>
+
+                <button type="submit" class="btn-primary">Ekle ve Gör</button>
+            </form>
+            <div id="feedback-message" class="hidden-feedback"></div>
+        </section>
+
+        <section class="card transaction-list">
+            <h2>Son İşlemler</h2>
+            <ul id="history-list">
+                <li class="list-item needs-item">
+                    <span>🛒 Market Alışverişi (İhtiyaç)</span>
+                    <span>-450 TL</span>
+                </li>
+                <li class="list-item wants-item">
+                    <span>☕ Dışarıda Kahve (Keyfi)</span>
+                    <span>-120 TL</span>
+                </li>
+                <li class="list-item invest-item">
+                    <span>🛡️ BES Katkı Payı (Yatırım)</span>
+                    <span>+500 TL</span>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+</body>
+</html>
