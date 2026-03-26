@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cüzdan Canavarı - Bilgi Arenası</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* GENEL TASARIM AYARLARI */
+        :root {
+            --bg-body: #f8f9fd;
+            --bg-sidebar: #ffffff;
+            --primary-blue: #1d4ed8; /* Tasarımdaki koyu mavi */
+            --primary-light: #eff6ff;
+            --text-dark: #111827;
+            --text-gray: #6b7280;
+            --text-light: #9ca3af;
+            --success-green: #10b981;
+            --success-light: #d1fae5;
+            --border-color: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; color: var(--text-dark); }
+
+        /* --- SOL MENÜ (SIDEBAR) --- */
+        .sidebar {
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; padding: 24px 20px;
+        }
+        .brand { font-size: 20px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { background: var(--primary-blue); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;}
+        
+        .user-profile-badge { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+        .user-info h4 { font-size: 14px; margin:0; font-weight: 700;}
+        .user-info p { font-size: 12px; color: var(--text-gray); margin:0; }
+
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-gray); font-weight: 500; padding: 12px 15px; border-radius: 12px; transition: 0.2s; }
+        .nav-links a.active { background: var(--primary-light); color: var(--primary-blue); font-weight: 700;}
+        .nav-links a:hover:not(.active) { background: #f9fafb; color: var(--text-dark); }
+
+        /* Tasarımdaki Mavi Coin Butonu */
+        .coins-btn {
+            background: var(--primary-blue); color: white; border: none; padding: 15px; border-radius: 12px;
+            font-weight: 600; width: 100%; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 14px; box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+        }
+        .bottom-links a { display: block; color: var(--text-gray); text-decoration: none; padding: 10px 15px; font-size: 14px; font-weight: 500;}
+
+        /* --- ANA İÇERİK --- */
+        .main-content { flex: 1; padding: 30px 50px; overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .search-area { flex: 1; max-width: 400px; position: relative; }
+        .search-area input { width: 100%; padding: 12px 15px 12px 40px; border: none; border-radius: 12px; background: white; font-size: 14px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .search-area::before { content: "🔍"; position: absolute; left: 15px; top: 12px; color: var(--text-gray); font-size: 14px; }
+        .header-icons { display: flex; align-items: center; gap: 20px; font-weight: 600; font-size: 14px;}
+
+        /* --- MAVİ BANNER --- */
+        .arena-banner {
+            background: linear-gradient(135deg, #0f40ce, #1d4ed8);
+            border-radius: 24px; padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(29, 78, 216, 0.15); position: relative; overflow: hidden;
+        }
+        .banner-bg-circle { position: absolute; bottom: -50px; left: 30%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .banner-content { position: relative; z-index: 2; max-width: 60%; }
+        .live-tag { background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 15px;}
+        .timer { font-size: 12px; font-weight: 500; margin-left: 10px; opacity: 0.9;}
+        .banner-content h1 { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+        .banner-content p { font-size: 13px; opacity: 0.8; line-height: 1.5; }
+        
+        .banner-stats { display: flex; gap: 20px; position: relative; z-index: 2;}
+        .stat-circle { background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); border-radius: 20px; padding: 15px 25px; text-align: center; border: 1px solid rgba(255,255,255,0.1);}
+        .stat-circle span { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-circle h3 { font-size: 24px; font-weight: 800; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 5px;}
+
+        /* --- GRID DÜZENİ --- */
+        .quiz-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+
+        /* Sol Sütun: Soru ve Şıklar */
+        .question-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 24px; border-left: 8px solid var(--primary-blue); display: flex; gap: 20px; align-items: flex-start;}
+        .q-number { width: 40px; height: 40px; background: var(--primary-light); color: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; flex-shrink: 0;}
+        .q-content h2 { font-size: 22px; font-weight: 700; color: #1f2937; line-height: 1.4; margin-bottom: 15px;}
+        .q-tags { display: flex; gap: 10px; }
+        .tag { background: #f3f4f6; color: var(--text-gray); font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 600;}
+
+        /* Şıklar Grid'i */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px;}
+        .option-card { background: white; border: 2px solid transparent; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+        .option-card:hover { border-color: var(--primary-light); transform: translateY(-2px); }
+        .opt-letter { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--text-gray); background: white;}
+        .opt-text { font-weight: 600; font-size: 15px; color: #374151;}
+        
+        /* Seçili Şık Stili */
+        .option-card.selected { background: var(--primary-blue); border-color: var(--primary-blue); box-shadow: 0 8px 15px rgba(29, 78, 216, 0.2);}
+        .option-card.selected .opt-letter { border-color: white; color: var(--primary-blue); }
+        .option-card.selected .opt-text { color: white; }
+        .selected-icon { display: none; color: white; font-size: 12px; margin-top: 4px; font-weight: 500;}
+        .option-card.selected .selected-icon { display: block; }
+
+        /* Alt Butonlar */
+        .action-buttons { display: flex; justify-content: space-between; align-items: center; }
+        .btn-pass { background: none; border: none; font-weight: 600; color: var(--text-gray); cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 5px;}
+        .btn-pass:hover { color: var(--text-dark); }
+        .btn-confirm { background: #16a34a; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3); transition: 0.2s; display: flex; align-items: center; gap: 8px;}
+        .btn-confirm:hover { background: #15803d; transform: translateY(-2px);}
+
+        /* Sağ Sütun: İstatistik ve Rozetler */
+        .side-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 20px;}
+        .side-card h3 { font-size: 12px; text-transform: uppercase; color: var(--text-gray); letter-spacing: 1px; margin-bottom: 20px;}
+        
+        .earnings-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;}
+        .earning-item { display: flex; align-items: center; gap: 15px; }
+        .earning-icon { width: 40px; height: 40px; background: var(--success-light); color: var(--success-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;}
+        .earning-text p { font-size: 11px; color: var(--text-gray); margin-bottom: 2px;}
+        .earning-text h4 { font-size: 16px; font-weight: 800; color: var(--text-dark);}
+        
+        .bonus-bar-container { margin-top: 10px; }
+        .bonus-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px;}
+        .bonus-bg { height: 6px; background: #e5e7eb; border-radius: 4px; overflow: hidden;}
+        .bonus-fill { height: 100%; background: var(--success-green); width: 40%;}
+
+        /* Rozetler */
+        .badges-container { display: flex; gap: 15px; }
+        .badge-slot { width: 50px; height: 50px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 20px; border: 2px dashed #e5e7eb;}
+        .badge-slot.active { background: var(--success-light); border: 2px solid var(--success-green); color: var(--success-green);}
+
+        /* İpucu Kartı */
+        .tip-card { background: #f5f3ff; border: 1px dashed #c4b5fd; border-radius: 16px; padding: 20px; display: flex; gap: 15px; align-items: flex-start;}
+        .tip-icon { color: #6d28d9; font-size: 20px; }
+        .tip-text h4 { font-size: 13px; color: #4c1d95; margin-bottom: 5px; font-weight: 700;}
+        .tip-text p { font-size: 12px; color: #5b21b6; line-height: 1.5; opacity: 0.9;}
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">👾</div>
+            Cüzdan Canavarı
+        </div>
+        
+        <div class="user-profile-badge">
+            <div class="user-info">
+                <h4 style="color: var(--text-gray); font-size: 12px; font-weight: normal;">Level 14 - 2,450 XP</h4>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="index.html">📁 Varlıklarım</a></li>
+            <li><a href="avatar.html">🤖 Avatarım</a></li>
+            <li><a href="#" class="active">❓ Bilgi Arenası</a></li>
+        </ul>
+
+        <div class="bottom-section" style="margin-top: auto;">
+            <button class="coins-btn">
+                <span id="sidebar-coins">1,250</span> Coins
+                <span>💳</span>
+            </button>
+            <div class="bottom-links">
+                <a href="#">⚙️ Ayarlar</a>
+                <a href="#">🚪 Çıkış</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div class="header">
+            <div class="search-area">
+                <input type="text" placeholder="Arena'da ara...">
+            </div>
+            <div class="header-icons">
+                <span>🔔</span> <span>📊</span> <span>👤 Profilim</span>
+            </div>
+        </div>
+
+        <div class="arena-banner">
+            <div class="banner-bg-circle"></div>
+            <div class="banner-content">
+                <div class="live-tag">CANLI ARENA <span class="timer">⏱️ 08:42 kaldı</span></div>
+                <h1>Finansal Gücünü Kanıtla!</h1>
+                <p>Bütçe yönetimi, yatırım stratejileri ve tasarruf sırları hakkında sorulan soruları yanıtla, Monster puanlarını katla.</p>
+            </div>
+            
+            <div class="banner-stats">
+                <div class="stat-circle">
+                    <span>SORU DURUMU</span>
+                    <h3>03 <span style="font-size: 16px; opacity:0.6;">/10</span></h3>
+                </div>
+                <div class="stat-circle" style="background: rgba(0,0,0,0.4); border-color: rgba(255,165,0,0.5);">
+                    <span>SERİ</span>
+                    <h3 style="color: #fbbf24;">🔥 2</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-layout">
+            
+            <div class="quiz-main">
+                <div class="question-card">
+                    <div class="q-number">3</div>
+                    <div class="q-content">
+                        <h2>Popüler "50/30/20" bütçeleme kuralına göre, gelirinizin %20'si hangi kategoriye ayrılmalıdır?</h2>
+                        <div class="q-tags">
+                            <span class="tag">Kategori: Bütçe Yönetimi</span>
+                            <span class="tag">Zorluk: Orta</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="options-grid">
+                    <div class="option-card" onclick="selectOption(this)">
+                        <div class="opt-letter">A</div>
+                        <div class="opt-text">
+                            Kira ve Faturalar
+                            <div class="selected-icon">✔ Seçildi</div>
+                        </div>
+                    </div>
+                    <div class="option-card selected" onclick="selectOption(this)" data-correct="true">
+                        <div class="opt-letter">B</div>
+                        <div class="opt-text">
+                            Birikim ve Borç Ödemeleri
+                            <div class="selected-icon">✔ Seçildi</div>
+                        </div>
+                    </div>
+                    <div class="option-card" onclick="selectOption(this)">
+                        <div class="opt-letter">C</div>
+                        <div class="opt-text">
+                            Eğlence ve Hobiler
+                            <div class="selected-icon">✔ Seçildi</div>
+                        </div>
+                    </div>
+                    <div class="option-card" onclick="selectOption(this)">
+                        <div class="opt-letter">D</div>
+                        <div class="opt-text">
+                            Mutfak ve Market Giderleri
+                            <div class="selected-icon">✔ Seçildi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-pass">← Pas Geç</button>
+                    <button class="btn-confirm" onclick="checkAnswer()">Onayla ve Devam Et →</button>
+                </div>
+            </div>
+
+            <div class="quiz-sidebar">
+                
+                <div class="side-card">
+                    <h3>OTURUM KAZANÇLARI</h3>
+                    <div class="earnings-list">
+                        <div class="earning-item">
+                            <div class="earning-icon">⭐</div>
+                            <div class="earning-text">
+                                <p>Toplam XP</p>
+                                <h4>+150 XP</h4>
+                            </div>
+                        </div>
+                        <div class="earning-item">
+                            <div class="earning-icon" style="color:#1d4ed8; background: #eff6ff;">🪙</div>
+                            <div class="earning-text">
+                                <p>Monster Coin</p>
+                                <h4 id="session-coin-display">+45 Coin</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bonus-bar-container">
+                        <div class="bonus-header"><span>BONUS ÇARPANI</span> <span>x1.2</span></div>
+                        <div class="bonus-bg"><div class="bonus-fill"></div></div>
+                    </div>
+                </div>
+
+                <div class="side-card">
+                    <h3>Arena Rozetlerin</h3>
+                    <div class="badges-container">
+                        <div class="badge-slot active">✔</div>
+                        <div class="badge-slot">🔒</div>
+                        <div class="badge-slot">🔒</div>
+                    </div>
+                </div>
+
+                <div class="tip-card">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">
+                        <h4>Monster İpucu</h4>
+                        <p>Birikim kategorisinde %20'yi aşarsan ekstra can kazanırsın!</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Sayfalar Arası Coin Taşıma Mantığı (Hackathon için LocalStorage)
+        let userCoins = 1250;
+        let sessionCoins = 45; // Bu oturumda kazanılan
+
+        // Sayfa yüklendiğinde LocalStorage'dan coini çek (varsa)
+        window.onload = function() {
+            if(localStorage.getItem("monsterCoins")) {
+                userCoins = parseInt(localStorage.getItem("monsterCoins"));
+            }
+            updateCoinUI();
+        }
+
+        function updateCoinUI() {
+            // Sidebar'ı güncelle
+            document.getElementById('sidebar-coins').innerText = userCoins.toLocaleString();
+            // Oturum kazancını güncelle
+            document.getElementById('session-coin-display').innerText = "+" + sessionCoins + " Coin";
+        }
+
+        // Şık Seçimi Etkileşimi
+        function selectOption(clickedElement) {
+            // Önce tüm şıklardan 'selected' sınıfını kaldır
+            let options = document.querySelectorAll('.option-card');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Sadece tıklanana 'selected' sınıfını ekle
+            clickedElement.classList.add('selected');
+        }
+
+        // Onaylama ve Para Kazanma
+        function checkAnswer() {
+            // Seçili olan şıkkı bul
+            let selectedOption = document.querySelector('.option-card.selected');
+            
+            if(!selectedOption) {
+                alert("Lütfen önce bir şık seçin!");
+                return;
+            }
+
+            // Doğru mu kontrol et (Biz B şıkkına data-correct="true" verdik)
+            if(selectedOption.getAttribute('data-correct') === 'true') {
+                // Doğru bildi! Coin ver.
+                let kazanilan = 50;
+                userCoins += kazanilan;
+                sessionCoins += kazanilan;
+                
+                // Diğer sayfalarda da görünmesi için LocalStorage'a kaydet
+                localStorage.setItem("monsterCoins", userCoins);
+                
+                updateCoinUI();
+                
+                // Başarı efekti
+                selectedOption.style.backgroundColor = "#10b981"; // Yeşile çevir
+                selectedOption.style.borderColor = "#10b981";
+                alert("🎉 Doğru Cevap! 50 Monster Coin kazandın. Avatar mağazasına gidip harcayabilirsin!");
+                
+                // Burada normalde Ajax ile sonraki soruya geçilir
+            } else {
+                // Yanlış cevap
+                selectedOption.style.backgroundColor = "#ef4444"; // Kırmızıya çevir
+                selectedOption.style.borderColor = "#ef4444";
+                alert("❌ Maalesef yanlış cevap. 50/30/20 kuralında %20 Birikime ayrılır. Canavarın biraz üzüldü.");
+            }
+        }
+    </script>
+</body>
+</html>

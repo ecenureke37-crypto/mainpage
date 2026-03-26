@@ -3,63 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CüzdanCanavarı - Varlıklarım</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Cüzdan Canavarı - Varlıklarım</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* GENEL TASARIM AYARLARI */
+        :root {
+            --bg-body: #f8f9fd;
+            --bg-sidebar: #ffffff;
+            --primary-blue: #2563eb;
+            --text-dark: #111827;
+            --text-gray: #6b7280;
+            --text-light: #9ca3af;
+            --danger-red: #ef4444;
+            --success-green: #10b981;
+            --border-color: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; color: var(--text-dark); }
+
+        /* --- SOL MENÜ (SIDEBAR) --- */
+        .sidebar {
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; padding: 24px 20px;
+        }
+        .brand { font-size: 20px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; }
+        
+        .user-profile-badge {
+            display: flex; align-items: center; gap: 12px; background: #f3f4f6;
+            padding: 10px 15px; border-radius: 20px; margin-bottom: 30px;
+        }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; object-fit: cover;}
+        .user-info h4 { font-size: 14px; margin:0; }
+        .user-info p { font-size: 12px; color: var(--text-gray); margin:0; }
+
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+            color: var(--text-gray); font-weight: 500; padding: 12px 15px; border-radius: 12px; transition: 0.2s;
+        }
+        .nav-links a.active { background: #eff6ff; color: var(--primary-blue); }
+        .nav-links a:hover:not(.active) { background: #f9fafb; color: var(--text-dark); }
+
+        .coins-btn {
+            background: #10b981; color: white; border: none; padding: 12px; border-radius: 12px;
+            font-weight: 600; width: 100%; margin-bottom: 20px; cursor: pointer;
+        }
+        .bottom-links a { display: block; color: var(--text-gray); text-decoration: none; padding: 10px 15px; font-size: 14px;}
+
+        /* --- ANA İÇERİK (DASHBOARD) --- */
+        .main-content { flex: 1; padding: 30px 50px; overflow-y: auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        .page-title h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
+        .page-title p { color: var(--text-gray); font-size: 14px; }
+        .btn-add {
+            background: var(--primary-blue); color: white; border: none; padding: 12px 24px;
+            border-radius: 24px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 15px;
+        }
+
+        /* GRID YERLEŞİMİ (Kartlar) */
+        .dashboard-grid {
+            display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;
+        }
+        .card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+        /* Toplam Varlık Kartı */
+        .balance-card { position: relative; overflow: hidden;}
+        .balance-title { font-size: 12px; font-weight: 600; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px;}
+        .balance-amount { font-size: 48px; font-weight: 800; color: var(--primary-blue); margin: 10px 0; display: flex; align-items: center; gap: 15px;}
+        .badge-green { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;}
+        .balance-footer { display: flex; gap: 40px; margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;}
+        .stat-box p { font-size: 12px; color: var(--text-gray); margin-bottom: 4px;}
+        .stat-box h4 { font-size: 16px; font-weight: 700;}
+        .btn-edit-balance { font-size: 12px; cursor: pointer; background: #f3f4f6; border:none; padding: 5px 10px; border-radius: 6px; color: var(--text-gray);}
+
+        /* Canavar Durumu Kartı (Mavi Kart) */
+        .monster-card { background: var(--primary-blue); color: white; border-radius: 20px; padding: 24px; position: relative; overflow: hidden;}
+        .monster-card h3 { font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;}
+        .progress-group { margin-bottom: 15px; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 500;}
+        .progress-bar-bg { background: rgba(255,255,255,0.2); height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { background: #10b981; height: 100%; border-radius: 4px;}
+        .nudge-message { font-size: 13px; font-style: italic; color: rgba(255,255,255,0.9); margin-top: 20px; line-height: 1.5; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; border-left: 3px solid #10b981;}
+
+        /* Alt Grid */
+        .dashboard-grid-bottom { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; margin-top: 24px;}
+        
+        /* Grafik Kartı */
+        .chart-card { text-align: center; }
+        .donut-chart {
+            width: 150px; height: 150px; border-radius: 50%; margin: 20px auto;
+            background: conic-gradient(var(--primary-blue) 0% 75%, #10b981 75% 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .donut-inner { width: 110px; height: 110px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .donut-inner h4 { font-size: 18px; font-weight: 800;}
+        .donut-inner p { font-size: 10px; color: var(--text-gray);}
+        
+        /* Son İşlemler Listesi */
+        .transactions-card h3 { font-size: 16px; margin-bottom: 20px;}
+        .tx-list { list-style: none; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color);}
+        .tx-item:last-child { border-bottom: none; }
+        .tx-left { display: flex; align-items: center; gap: 15px;}
+        .tx-icon { width: 40px; height: 40px; border-radius: 12px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-size: 20px;}
+        .tx-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px;}
+        .tx-info p { font-size: 12px; color: var(--text-gray);}
+        .tx-amount { font-size: 15px; font-weight: 700; text-align: right;}
+        .tx-amount.negative { color: var(--danger-red); }
+        .tx-amount.positive { color: var(--success-green); }
+        .tx-amount p { font-size: 11px; color: var(--text-gray); font-weight: normal; margin-top: 4px;}
+
+        /* --- MODAL (POP-UP) İŞLEM EKLEME FORMU --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+        .modal-header h2 { font-size: 20px;}
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-gray);}
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none;}
+        .form-group input:focus { border-color: var(--primary-blue); }
+        
+        /* Toggle Switch */
+        .toggle-container { display: flex; align-items: center; justify-content: space-between; margin: 25px 0; background: #f9fafb; padding: 15px; border-radius: 12px;}
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--success-green); transition: .4s; border-radius: 34px;}
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;}
+        input:checked + .slider { background-color: var(--danger-red); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary-blue); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 15px;}
+    </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="logo">👾 CüzdanCanavarı</div>
-        <nav>
-            <a href="index.html" class="active">Varlıklarım</a>
-            <a href="avatar.html">Avatarım</a>
-            <a href="#">Bilgi Arenası</a>
-        </nav>
-        <div class="coin-display">🪙 <span id="user-coins">1250</span> Coin</div>
-    </header>
-
-    <main class="container">
+    <aside class="sidebar">
+        <div class="brand">Cüzdan Canavarı</div>
         
-        <section class="card add-transaction">
-            <h2>Yeni İşlem Ekle</h2>
+        <div class="user-profile-badge">
+            <img src="https://robohash.org/cuzdan-canavari.png?set=set4" alt="Avatar" class="user-avatar">
+            <div class="user-info">
+                <h4>Level 14</h4>
+                <p>2,450 XP</p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="#" class="active">📁 Varlıklarım</a></li>
+            <li><a href="avatar.html">🤖 Avatarım</a></li>
+            <li><a href="quiz.html">❓ Bilgi Arenası</a></li>
+        </ul>
+
+        <div class="bottom-section">
+            <button class="coins-btn">1,250 Coins</button>
+            <div class="bottom-links">
+                <a href="#">⚙️ Ayarlar</a>
+                <a href="#">🚪 Çıkış</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div class="header">
+            <div class="page-title">
+                <h1>Varlıklarım</h1>
+                <p>Finansal yolculuğun ve canavarının gelişimi burada.</p>
+            </div>
+            <button class="btn-add" id="openModalBtn">
+                <span style="font-size: 18px;">+</span> Yeni İşlem Ekle
+            </button>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <div class="card balance-card">
+                <div class="balance-title">TOPLAM VARLIK (BAKİYE)</div>
+                <div class="balance-amount">
+                    ₺<span id="real-balance">42850</span>,00
+                    <button class="btn-edit-balance" onclick="editBalance()">✏️ Düzenle</button>
+                </div>
+                <div><span class="badge-green">~ %12.4</span> Geçen aya göre artış</div>
+                
+                <div class="balance-footer">
+                    <div class="stat-box">
+                        <p>NAKİT</p>
+                        <h4 id="nakit-display">₺12.400</h4>
+                    </div>
+                    <div class="stat-box">
+                        <p>YATIRIM</p>
+                        <h4>₺28.150</h4>
+                    </div>
+                    <div class="stat-box">
+                        <p>BİRİKİM</p>
+                        <h4>₺2.300</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card monster-card">
+                <h3>📈 Canavar Durumu</h3>
+                
+                <div class="progress-group">
+                    <div class="progress-header"><span>Sağlık (Bütçe Uyumu)</span><span>%85</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 85%;"></div></div>
+                </div>
+                
+                <div class="progress-group">
+                    <div class="progress-header"><span>Enerji (Birikim Hedefi)</span><span>%42</span></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 42%; background: #34d399;"></div></div>
+                </div>
+
+                <div class="nudge-message" id="monster-message">
+                    "Harika gidiyorsun! Bu hafta dışarıda yemek harcamalarını %10 azaltırsan canavarın bir üst seviyeye çıkacak."
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid-bottom">
+            
+            <div class="card chart-card">
+                <h3 style="text-align: left; font-size: 16px; margin-bottom: 10px;">Haftalık Harcama Özeti</h3>
+                <div class="donut-chart">
+                    <div class="donut-inner">
+                        <h4>₺4.200</h4>
+                        <p>TOPLAM</p>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <span style="font-size: 13px;">🔵 Harcamalar</span> <span style="font-weight: 600; font-size: 13px;">₺3.150</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+                    <span style="font-size: 13px;">🟢 Birikim Hedefi</span> <span style="font-weight: 600; font-size: 13px;">₺1.050</span>
+                </div>
+            </div>
+
+            <div class="card transactions-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>Son İşlemler</h3>
+                    <a href="#" style="font-size: 13px; color: var(--primary-blue); text-decoration: none; font-weight: 500;">Tümünü Gör</a>
+                </div>
+                
+                <ul class="tx-list" id="history-list">
+                    <li class="tx-item">
+                        <div class="tx-left">
+                            <div class="tx-icon" style="background: #fee2e2; color: #ef4444;">🍔</div>
+                            <div class="tx-info">
+                                <h4>Burger Evi</h4>
+                                <p>Dün, 19:45 • Keyfi</p>
+                            </div>
+                        </div>
+                        <div class="tx-amount negative">
+                            - ₺245,50
+                            <p>NAKİT</p>
+                        </div>
+                    </li>
+                    <li class="tx-item">
+                        <div class="tx-left">
+                            <div class="tx-icon" style="background: #e0e7ff; color: var(--primary-blue);">🏠</div>
+                            <div class="tx-info">
+                                <h4>Aylık Kira</h4>
+                                <p>15 Eki • İhtiyaç</p>
+                            </div>
+                        </div>
+                        <div class="tx-amount negative">
+                            - ₺8.500,00
+                            <p>BANKA</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Yeni İşlem Ekle</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
             <form id="transaction-form">
                 <div class="form-group">
-                    <input type="text" placeholder="Ne için harcadın? (Örn: Kahve)" required id="trans-desc">
-                    <input type="number" placeholder="Tutar (TL)" required id="trans-amount">
+                    <input type="text" placeholder="Ne için harcadın? (Örn: Kahve, Market)" required id="trans-desc">
+                </div>
+                <div class="form-group">
+                    <input type="number" placeholder="Tutar (₺)" required id="trans-amount">
                 </div>
                 
                 <div class="toggle-container">
-                    <span>Zorunlu İhtiyaç</span>
+                    <span style="color: var(--success-green); font-weight: 600;">Zorunlu İhtiyaç</span>
                     <label class="switch">
                         <input type="checkbox" id="type-toggle">
                         <span class="slider round"></span>
                     </label>
-                    <span class="highlight-red">Keyfi Harcama</span>
+                    <span style="color: var(--danger-red); font-weight: 600;">Keyfi Harcama</span>
                 </div>
 
-                <button type="submit" class="btn-primary">Ekle ve Gör</button>
+                <button type="submit" class="btn-submit">İşlemi Kaydet</button>
             </form>
-            <div id="feedback-message" class="hidden-feedback"></div>
-        </section>
+        </div>
+    </div>
 
-        <section class="card transaction-list">
-            <h2>Son İşlemler</h2>
-            <ul id="history-list">
-                <li class="list-item needs-item">
-                    <span>🛒 Market Alışverişi (İhtiyaç)</span>
-                    <span>-450 TL</span>
-                </li>
-                <li class="list-item wants-item">
-                    <span>☕ Dışarıda Kahve (Keyfi)</span>
-                    <span>-120 TL</span>
-                </li>
-                <li class="list-item invest-item">
-                    <span>🛡️ BES Katkı Payı (Yatırım)</span>
-                    <span>+500 TL</span>
-                </li>
-            </ul>
-        </section>
-    </main>
+    <script>
+        // --- MODAL AÇMA / KAPAMA MANTIĞI ---
+        const modal = document.getElementById('transactionModal');
+        const openBtn = document.getElementById('openModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
 
+        openBtn.onclick = () => modal.style.display = 'flex';
+        closeBtn.onclick = () => modal.style.display = 'none';
+        window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; }
+
+        // --- BAKİYE VE İŞLEM MANTIĞI ---
+        let realBalance = 42850; 
+
+        function editBalance() {
+            let newVal = prompt("Yeni Bakiyenizi Girin (Sadece rakam):", realBalance);
+            if(newVal && !isNaN(newVal)) {
+                realBalance = parseFloat(newVal);
+                document.getElementById('real-balance').innerText = realBalance;
+            }
+        }
+
+        const transactionForm = document.getElementById('transaction-form');
+        const historyList = document.getElementById('history-list');
+        const monsterMessage = document.getElementById('monster-message');
+
+        transactionForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Sayfa yenilenmesini durdur
+
+            const desc = document.getElementById('trans-desc').value;
+            const amount = parseFloat(document.getElementById('trans-amount').value);
+            const isKeyfi = document.getElementById('type-toggle').checked;
+
+            if (amount > realBalance) {
+                alert("Bakiyeniz yetersiz!");
+                return;
+            }
+
+            // 1. Bakiyeyi Düşür
+            realBalance -= amount;
+            document.getElementById('real-balance').innerText = realBalance;
+            
+            // Nakit Göstergesini de Temsili Olarak Düşür
+            document.getElementById('nakit-display').innerText = `₺${realBalance - 30450}`; 
+
+            // 2. Canavar Mesajını (Dürtme) Güncelle
+            let itemIcon = "";
+            let itemColor = "";
+            let itemLabel = "";
+
+            if (isKeyfi) {
+                itemIcon = "☕"; itemColor = "#fee2e2"; itemLabel = "Keyfi";
+                let gelecekDeger = amount * 3; 
+                monsterMessage.innerHTML = `🚨 <strong>Farkındalık Uyarısı:</strong> Bu ₺${amount}'lik harcamayı yapmak yerine BES'e aktarsaydın, 10 yıl sonra tahmini <strong>₺${gelecekDeger}</strong> olabilirdi! Enerjim biraz düştü...`;
+                monsterMessage.style.borderLeftColor = "var(--danger-red)";
+            } else {
+                itemIcon = "🛒"; itemColor = "#e0e7ff"; itemLabel = "İhtiyaç";
+                monsterMessage.innerHTML = `✅ <strong>Harika Karar!</strong> Sadece zorunlu ihtiyaçlarına odaklanıyorsun. Bütçen güvende ve sağlığım yerinde!`;
+                monsterMessage.style.borderLeftColor = "var(--success-green)";
+            }
+
+            // 3. Listeye Yeni Eleman Ekle (Tasarıma uygun yapıda)
+            const newListItem = document.createElement('li');
+            newListItem.className = 'tx-item';
+            newListItem.innerHTML = `
+                <div class="tx-left">
+                    <div class="tx-icon" style="background: ${itemColor};">${itemIcon}</div>
+                    <div class="tx-info">
+                        <h4>${desc}</h4>
+                        <p>Bugün • ${itemLabel}</p>
+                    </div>
+                </div>
+                <div class="tx-amount negative">
+                    - ₺${amount.toFixed(2)}
+                    <p>NAKİT</p>
+                </div>
+            `;
+            
+            historyList.insertBefore(newListItem, historyList.firstChild);
+
+            // 4. Formu temizle ve Modalı Kapat
+            document.getElementById('trans-desc').value = '';
+            document.getElementById('trans-amount').value = '';
+            document.getElementById('type-toggle').checked = false;
+            modal.style.display = 'none';
+        });
+    </script>
 </body>
 </html>

@@ -3,69 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CüzdanCanavarı - Avatarım</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Cüzdan Canavarı - Avatarım</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* GENEL TASARIM AYARLARI */
+        :root {
+            --bg-body: #f8f9fd;
+            --bg-sidebar: #ffffff;
+            --primary-blue: #2563eb;
+            --text-dark: #111827;
+            --text-gray: #6b7280;
+            --text-light: #9ca3af;
+            --danger-red: #ef4444;
+            --success-green: #10b981;
+            --border-color: #e5e7eb;
+            --coin-color: #f39c12;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; color: var(--text-dark); }
+
+        /* --- SOL MENÜ (SIDEBAR) --- index.html ile aynı yapıda --- */
+        .sidebar {
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; padding: 24px 20px;
+        }
+        .brand { font-size: 20px; font-weight: 800; color: var(--primary-blue); margin-bottom: 30px; }
+        
+        .user-profile-badge {
+            display: flex; align-items: center; gap: 12px; background: #f3f4f6;
+            padding: 10px 15px; border-radius: 20px; margin-bottom: 30px;
+        }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; object-fit: cover;}
+        .user-info h4 { font-size: 14px; margin:0; }
+        .user-info p { font-size: 12px; color: var(--text-gray); margin:0; }
+
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+            color: var(--text-gray); font-weight: 500; padding: 12px 15px; border-radius: 12px; transition: 0.2s;
+        }
+        .nav-links a.active { background: #eff6ff; color: var(--primary-blue); }
+        .nav-links a:hover:not(.active) { background: #f9fafb; color: var(--text-dark); }
+
+        .coins-btn {
+            background: #d1fae5; color: #065f46; border: none; padding: 12px; border-radius: 12px;
+            font-weight: 600; width: 100%; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .bottom-links a { display: block; color: var(--text-gray); text-decoration: none; padding: 10px 15px; font-size: 14px;}
+
+        /* --- ANA İÇERİK AREA --- */
+        .main-content { flex: 1; padding: 30px 50px; overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .search-area { flex: 1; max-width: 400px; position: relative; }
+        .search-area input { width: 100%; padding: 12px 15px 12px 40px; border: 1px solid var(--border-color); border-radius: 12px; background: #fff; font-size: 14px; outline: none; }
+        .search-area::before { content: "🔍"; position: absolute; left: 15px; top: 12px; color: var(--text-gray); font-size: 16px; }
+
+        .dashboard-grid {
+            display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; flex: 1;
+        }
+        .card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+        /* --- Sol Sütun: Avatar Görüntüleme --- */
+        .avatar-preview-container { display: flex; flex-direction: column; gap: 24px; position: sticky; top: 110px; height: calc(100vh - 140px); }
+        .avatar-header h2 { font-size: 24px; font-weight: 700; }
+        .badge-group { display: flex; gap: 10px; margin-top: 8px; }
+        .badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+        .badge-blue { background: #e0e7ff; color: var(--primary-blue); }
+        .badge-gray { background: #f3f4f6; color: var(--text-gray); }
+
+        .avatar-stage-card { position: relative; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 20px; padding: 20px; overflow: hidden; height: 350px; }
+        
+        /* Animasyonlu Canavar Temel Resmi */
+        .avatar-layer.body { 
+            position: relative; z-index: 1; max-width: 90%; max-height: 90%; 
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Giydirme Katmanları Mantığı (index.html ile aynı) */
+        .avatar-layer { position: absolute; max-height: 90%; transition: 0.3s; }
+        .avatar-layer.shirt { z-index: 2; top: 120px; } /* Tasarıma göre pozisyon */
+        .avatar-layer.hair { z-index: 3; top: 20px; }
+        .avatar-layer.shoes { z-index: 4; bottom: 40px; }
+
+        /* Süzülme Animasyonu */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); } 
+            100% { transform: translateY(0px); }
+        }
+
+        /* Tasarımdaki Can/Enerji Barları */
+        .avatar-stats-card { background: white; border-radius: 12px; padding: 15px; display: flex; gap: 20px; margin-top: auto; justify-content: center;}
+        .stat-group { flex: 1; text-align: center;}
+        .stat-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-gray); margin-bottom: 5px;}
+        .progress-bar-bg { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 4px;}
+        .progress-health { background: var(--danger-red); width: 85%; }
+        .progress-energy { background: var(--success-green); width: 42%; }
+
+        /* --- Sağ Sütun: Özelleştirme Mağazası --- */
+        .avatar-shop-container { display: flex; flex-direction: column; gap: 24px; }
+        .shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .shop-header h2 { font-size: 18px; font-weight: 700; }
+        .shop-coins { font-size: 16px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px; background: #fff; padding: 8px 15px; border-radius: 20px; }
+
+        /* Kategori Sekmeleri */
+        .shop-tabs { display: flex; gap: 15px; margin-bottom: 20px; }
+        .tab-btn { background: none; border: none; color: var(--text-gray); font-size: 14px; font-weight: 600; cursor: pointer; padding-bottom: 8px; }
+        .tab-btn.active { color: var(--primary-blue); border-bottom: 2px solid var(--primary-color); }
+        .tab-btn:hover:not(.active) { color: var(--text-dark); }
+
+        /* Ürün Izgarası */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; flex: 1; overflow-y: auto; padding-right: 5px; }
+        .shop-item { background: #fff; border-radius: 16px; padding: 15px; text-align: left; transition: 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .shop-item:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
+        
+        /* Aktif Eşya Etiketi */
+        .shop-item.equipped { background: #e0f2f1; border-left: 3px solid var(--success-green); }
+        .equipped-label { color: var(--success-green); font-size: 10px; font-weight: 600; position: absolute; top: 10px; right: 10px; background: #fff; padding: 2px 6px; border-radius: 4px;}
+
+        .item-icon { height: 120px; background-color: #f1f2f6; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; }
+        .item-icon img { max-width: 80%; max-height: 80%; }
+        
+        .item-name { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px;}
+        .item-rarity { font-size: 11px; color: var(--text-light); margin-bottom: 10px;}
+        
+        .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .item-price { font-size: 13px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 4px; }
+        .btn-buy { background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer;}
+        .btn-buy:disabled { background-color: #bdc3c7; cursor: not-allowed;}
+
+        /* Büyük Kaydet Butonu */
+        .btn-save-all { width: 100%; padding: 15px; background: var(--primary-blue); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; margin-top: auto; }
+        .btn-save-all:hover { background-color: #357abd; }
+    </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="logo">👾 CüzdanCanavarı</div>
-        <nav>
-            <a href="index.html">Varlıklarım</a>
-            <a href="avatar.html" class="active">Avatarım</a>
-            <a href="#">Bilgi Arenası</a>
-        </nav>
-        <div class="coin-display">🪙 1250 Coin</div>
-    </header>
-
-    <main class="container avatar-page-layout">
+    <aside class="sidebar">
+        <div class="brand">Cüzdan Canavarı</div>
         
-        <section class="avatar-preview-container">
-            <div class="card avatar-card">
-                <h2>CüzdanCanavarı Lvl. 3</h2>
+        <div class="user-profile-badge">
+            <img src="https://robohash.org/cuzdan-canavari.png?set=set4" alt="Avatar" class="user-avatar">
+            <div class="user-info">
+                <h4>Level 14</h4>
+                <p>2,450 XP</p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="index.html">📁 Varlıklarım</a></li>
+            <li><a href="#" class="active">🤖 Avatarım</a></li>
+            <li><a href="quiz.html">❓ Bilgi Arenası</a></li>
+        </ul>
+
+        <div class="bottom-section">
+            <button class="coins-btn">🪙 <span id="sidebar-coins">1250</span> Coins</button>
+            <div class="bottom-links">
+                <a href="#">⚙️ Ayarlar</a>
+                <a href="#">🚪 Çıkış</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div class="header">
+            <div class="search-area">
+                <input type="text" placeholder="Mağazada ara...">
+            </div>
+            <div style="display:flex; gap: 15px; color: var(--text-gray);">🔔 📊 👤 Mert Kaya</div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <section class="avatar-preview-container card">
+                <div class="avatar-header">
+                    <h2>Mavi Canavar</h2>
+                    <div class="badge-group">
+                        <span class="badge badge-blue">Seviye 3</span>
+                        <span class="badge badge-gray">Ejderha Sınıfı</span>
+                    </div>
+                </div>
                 
-                <div class="avatar-visual">
-                    <img src="https://via.placeholder.com/200x250/e0e0e0/333?text=Base+Body" alt="Avatar Body" class="avatar-layer body">
+                <div class="avatar-stage-card" id="avatar-stage">
+                    <img src="https://robohash.org/cuzdan-canavari.png?set=set4" alt="Avatar Body" class="avatar-layer body" id="avatar-body">
+                    
                     </div>
 
-                <div class="avatar-stats">
-                    <div class="stat">❤ Can: 80/100</div>
-                    <div class="stat">⚡ Enerji: 95/100</div>
+                <div class="avatar-stats-card">
+                    <div class="stat-group">
+                        <div class="stat-header"><span>CAN (HP)</span> <span>85/100</span></div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill progress-health"></div></div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-header"><span>ENERJİ</span> <span>42/100</span></div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill progress-energy"></div></div>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="avatar-shop-container">
-            <div class="card shop-card">
-                <h2>Özelleştirme Mağazası</h2>
+            <section class="avatar-shop-container card">
+                <div class="shop-header">
+                    <h2>Özelleştirme Mağazası</h2>
+                    <div class="shop-coins">🪙 <span id="shop-coins">1250</span></div>
+                </div>
                 
                 <div class="shop-tabs">
                     <button class="tab-btn active">Saç</button>
                     <button class="tab-btn">Kıyafet</button>
                     <button class="tab-btn">Ayakkabı</button>
+                    <button class="tab-btn">Aksesuar</button>
                 </div>
 
-                <div class="shop-grid">
+                <div class="shop-grid" id="shop-items">
+                    
                     <div class="shop-item">
                         <div class="item-icon">✂️</div>
-                        <div class="item-name">Mavi Havalı Saç</div>
-                        <button class="btn-buy">🪙 300 Coin</button>
+                        <div class="item-name">Altın Vizör</div>
+                        <p class="item-rarity">Destansı</p>
+                        <div class="item-footer">
+                            <div class="item-price">🪙 350</div>
+                            <button class="btn-buy" onclick="buyItem('hair_gold_visor', 350, this, 'hair')">SATIN AL</button>
+                        </div>
                     </div>
-                    <div class="shop-item owned">
+                    
+                    <div class="shop-item equipped">
+                        <span class="equipped-label">Kullanılıyor</span>
                         <div class="item-icon">👕</div>
                         <div class="item-name">Kodcu Tişörtü</div>
-                        <button class="btn-buy" disabled>Sahipsin</button>
+                        <p class="item-rarity">Yaygın</p>
+                        <div class="item-footer">
+                            <div class="item-price">🪙 120</div>
+                            <button class="btn-buy" disabled style="background: gray;">SATIN AL</button>
+                        </div>
                     </div>
+                    
                     <div class="shop-item">
                         <div class="item-icon">👟</div>
-                        <div class="item-name">Hızlı Koşan Ayakkabı</div>
-                        <button class="btn-buy">🪙 500 Coin</button>
+                        <div class="item-name">Kral Tacı</div>
+                        <p class="item-rarity">Efsanevi</p>
+                        <div class="item-footer">
+                            <div class="item-price">🪙 850</div>
+                            <button class="btn-buy" onclick="buyItem('shoes_king_crown', 850, this, 'shoes')">SATIN AL</button>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
 
+                    <div class="shop-item">
+                        <div class="item-icon">👟</div>
+                        <div class="item-name">Güneş Gözlüğü</div>
+                        <p class="item-rarity">Yaygın</p>
+                        <div class="item-footer">
+                            <div class="item-price">🪙 90</div>
+                            <button class="btn-buy" onclick="buyItem('accessory_sunglasses', 90, this, 'accessory')">SATIN AL</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="btn-save-all">TÜMÜNÜ KAYDET</button>
+            </section>
+
+        </div>
     </main>
+
+    <script>
+        // Başlangıç coinimiz (Yazılımın işlevi burayı yönetir)
+        let userCoins = 1250; 
+
+        // Ekrandaki tüm coin yazılarını (Sidebar ve Mağaza) güncelleyen fonksiyon
+        function updateCoinDisplay() {
+            document.getElementById('sidebar-coins').innerText = userCoins;
+            document.getElementById('shop-coins').innerText = userCoins;
+        }
+
+        // --- Eski 'buyItem' ve 'equipItem' işlevlerini yeni arayüzle bağlıyoruz ---
+        
+        function buyItem(itemName, price, buttonElement, category) {
+            if (userCoins >= price) {
+                userCoins -= price;
+                updateCoinDisplay(); 
+
+                // Butonu deaktif et, şeklini ve yazısını değiştir (Yazılımın işlevi)
+                buttonElement.innerText = "Kullanılıyor";
+                buttonElement.disabled = true;
+                buttonElement.style.background = "gray";
+                
+                // Ürün kartına "Kullanılıyor" etiketini ve yeşil arka planı ekle (Yazılımın işlevi)
+                let shopItemCard = buttonElement.closest('.shop-item');
+                shopItemCard.classList.add("equipped");
+                let label = document.createElement('span');
+                label.className = "equipped-label";
+                label.innerText = "Kullanılıyor";
+                shopItemCard.prepend(label);
+
+                // Avatarı Giydir (Eski 'equipItem' işlevi)
+                equipItem(category, itemName);
+
+            } else {
+                // Para yetmezse uyarı ver (Yazılımın işlevi)
+                alert("Üzgünüm! Yeterli coinin yok. Quiz çözerek kazanabilirsin!");
+            }
+        }
+
+        // Eski Giydirme Mantığı (assets/ klasörünü kullanır)
+        function equipItem(category, itemName) {
+            let layer = document.getElementById('equipped-' + category);
+            
+            // Eğer o kategoride bir eşya yoksa yeni bir <img> oluştur
+            if (!layer) {
+                layer = document.createElement('img');
+                layer.id = 'equipped-' + category;
+                
+                // 'alive-avatar' yerine yeni sınıf yapımızla süzülmeyi sağlamak için (CSS animasyonlu body)
+                layer.className = 'avatar-layer body alive-avatar ' + category;
+                
+                // Z-index sıralaması: Saç en üstte, tişört ortada
+                if (category === 'hair') {
+                    layer.style.zIndex = '3';
+                    layer.style.top = '20px';
+                }
+                else if (category === 'clothing') {
+                    layer.style.zIndex = '2';
+                    layer.style.top = '120px';
+                }
+                else if (category === 'shoes') {
+                    layer.style.zIndex = '4';
+                    layer.style.bottom = '40px';
+                }
+                
+                // Resmin boyutunu robotla uyumlu yapalım
+                layer.style.maxWidth = '100px'; 
+                
+                document.getElementById('avatar-stage').appendChild(layer);
+            }
+            
+            // Sadece assets klasöründe "mavi_sac.png" gibi görseller olsaydı çalışacak kod (Yazılımın işlevi)
+            // layer.src = "assets/" + itemName + ".png";
+            
+            console.log(itemName + " giydirildi!");
+            alert("Yeni eşyan eklendi! (Eğer assets klasöründe " + itemName + ".png olsaydı şu an robotun üzerindeydi 😊)");
+        }
+
+        window.onload = function() {
+            updateCoinDisplay();
+        };
+    </script>
 
 </body>
 </html>
